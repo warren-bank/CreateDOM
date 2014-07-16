@@ -6,7 +6,7 @@
  *     url:     http://www.openjs.com/scripts/createdom/
  * author
  *     name:    Binny V Abraham
- *     email:   moc.liamg@avynnib
+ *     email:   binnyva@gmail.com
  *     url:     http://binnyva.com/me/
  * license
  *     name:    BSD License
