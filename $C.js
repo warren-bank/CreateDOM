@@ -32,6 +32,36 @@ var $C = function(dom,id,doc) {
 	var valid_tags = ",b,p,div,span,strong,em,u,img,pre,code,br,hr,a,script,link,table,tr,td,h1,h2,h3,h4,h5,h6,sup,sub,ul,ol,li,dd,dl,dt,form,input,textarea,legend,label,fieldset,select,option,blockquote,";
 	var html = new Array();
 	var non_alapha = new RegExp(/_\d*$/);
+	var get_textnode = function(value){
+		var ele;
+
+		if (
+				(typeof value === "object")
+			&&	(value !== null)
+			&&	(typeof value.condition !== "undefined")
+		){
+			// process: {"condition":bool,"text":string}
+			if (
+					(value.condition)
+				&&	(typeof value.text !== "undefined")
+			){
+				ele = get_textnode(value.text);
+			}
+		}
+		else {
+			// process text value. correct some common mistakes by casting non-string to string.
+			switch (typeof value){
+				case 'number':
+				case 'boolean':
+				case 'function':
+					value = (value).toString();
+				case 'string':
+					ele = doc.createTextNode(value);
+					break;
+			}
+		}
+		return ele;
+	};
 	for(var tag in dom) {
 		var child = false;
 		if(isNaN(tag)) { //Associative array
@@ -48,17 +78,7 @@ var $C = function(dom,id,doc) {
 
 		var ele;
 		if (tag == "text"){
-			if (typeof attributes === "string"){
-				ele = doc.createTextNode(attributes);
-			}
-			else if (
-					(typeof attributes === "object")
-				&&	(attributes !== null)
-				&&	(attributes.text)
-				&&	(attributes.condition || (typeof attributes.condition === "undefined"))
-			){
-				ele = doc.createTextNode(attributes.text);
-			}
+			ele = get_textnode(attributes);
 			attributes = false;
 		}
 		else {
@@ -88,18 +108,7 @@ var $C = function(dom,id,doc) {
 					ele.appendChild($C(node,"",doc));// :RECURSION:
 				}
 				else if(att == "text") {
-					//The text in the tag
-					if (typeof value === "string"){
-						child = doc.createTextNode(value);
-					}
-					else if (
-							(typeof value === "object")
-						&&	(value !== null)
-						&&	(value.text)
-						&&	(value.condition || (typeof value.condition === "undefined"))
-					){
-						child = doc.createTextNode(value.text);
-					}
+					child = get_textnode(value);
 				}
 				else ele.setAttribute(att,value);
 			}
