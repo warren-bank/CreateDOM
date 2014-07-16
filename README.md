@@ -66,7 +66,7 @@ $C({
 			"span"		: {
 				"class"	: "expand_button"
 			},
-			"text"		: ("" + name)
+			"text"		: name
 		},
 		"text"			: " : "
 	},

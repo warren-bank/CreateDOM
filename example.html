@@ -1,0 +1,52 @@
+<html>
+<head>
+<script type="text/javascript" src="$C.js"></script>
+<script type="text/javascript">
+window.onload = function(){
+	var get_domtree_spec = function(name, sym, is_last){
+		var spec = {
+			"span" : {
+				"condition"		: (name !== null),
+				"class"			: "name_wrapper",
+				"span"			: {
+					"class"		: "name",
+					"span"		: {
+						"class"	: "expand_button"
+					},
+					"text"		: name
+				},
+				"text"			: " : "
+			},
+			"div" : {
+				"class"			: "value",
+				"b_1"			: sym[0],
+				"ul"			: {
+					"class"		: "children"
+				},
+				"b_2"			: sym[1],
+				"text"			: {
+					"condition"	: (!is_last),
+					"text"		: ","
+				}
+			}
+		};
+		return spec;
+	};
+
+	$C(
+		get_domtree_spec('1', ['{','}'], false),
+		document.getElementById('dom_root_1')
+	);
+
+	$C(
+		get_domtree_spec(2, ['[',']'], true),
+		document.getElementById('dom_root_2')
+	);
+};
+</script>
+</head>
+<body>
+	<div id="dom_root_1"></div>
+	<div id="dom_root_2"></div>
+</body>
+</html>
