@@ -150,3 +150,12 @@ things to note:
   * this uses the 2nd (legacy) workaround methodology.
   * _parent_element_ in this case is a string, which must be a DOM node "id".
   * _document_ is not being specified, so window.document will be used to create all Elements.
+
+## Closing Comments
+
+  * In most situations, jQuery will already be available and adding yet-another script to the page will be unnecessary.
+  * My particular use-case was one in which I wanted to keep the code base as minimal as possible,
+    and there were no pre-loaded libraries to leverage (writing Firefox add-ons).
+    That being said, I actually do prefer this syntax;
+    it feels much more natural and streamline to me, than writing nested .append() statements.
+    Also, any logical "condition" would interrupt chaining.
