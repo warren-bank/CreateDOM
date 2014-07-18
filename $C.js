@@ -13,9 +13,14 @@
  *     url:     http://www.openjs.com/license.php
  * --------------------------------------------------------
  * modified script
+ *     name:    CreateDOM - $C()
+ *     summary: Create DOM Stuctures Easily
+ *     url:     https://github.com/warren-bank/CreateDOM
  *     notes:   forked from original script on 07/16/2014
  * author
  *     name:    Warren R Bank
+ *     email:   warren.r.bank@gmail.com
+ *     url:     https://github.com/warren-bank
  * license
  *     name:    GPLv2
  *     url:     http://www.gnu.org/licenses/gpl-2.0.txt
