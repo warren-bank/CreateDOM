@@ -30,14 +30,31 @@
  * --------------------------------------------------------
  */
 
-var $C = function(dom,id,doc) {
-	if(!doc) var doc = document;
-	//Most *necessary* HTML tags - make sure not to include any tags that is also a valid attribute name - eg 'cite'
-	//Begining and ending commas are intentional - don't remove them
-	var valid_tags = ",b,p,div,span,strong,em,u,img,pre,code,br,hr,a,script,link,table,tr,td,h1,h2,h3,h4,h5,h6,sup,sub,ul,ol,li,dd,dl,dt,form,input,textarea,legend,label,fieldset,select,option,blockquote,";
-	var html = new Array();
-	var non_alapha = new RegExp(/_\d*$/);
-	var get_textnode = function(value){
+var $C = function(dom, id, _doc) {
+	var doc, valid_tags, html, non_alapha, get_textnode, tag, child, attributes, tagname, ele, att, value, index, node;
+
+	doc							= _doc || document;
+
+	// csv list. first and last character must also be: ','
+	// note: any tag name that's more commonly used as an attribute name should be removed. ex: ['cite','style','title']
+
+	// http://www.w3.org/TR/html4/index/elements.html
+	/*
+		(function($){
+			var valid_tags = [];
+			$('td[title="Name"] > a').each(function(){
+				var tag = $.trim( $(this).text().toLowerCase() );
+				valid_tags.push(tag);
+			});
+			valid_tags = ',' + valid_tags.join(',') + ',';
+			console.log(valid_tags);
+		})(jQuery);
+	*/
+	valid_tags					= ',a,abbr,acronym,address,applet,area,b,base,basefont,bdo,big,blockquote,body,br,button,caption,center,' + /* 'cite,' + */ 'code,col,colgroup,dd,del,dfn,dir,div,dl,dt,em,fieldset,font,form,frame,frameset,h1,h2,h3,h4,h5,h6,head,hr,html,i,iframe,img,input,ins,isindex,kbd,label,legend,li,link,map,menu,meta,noframes,noscript,object,ol,optgroup,option,p,param,pre,q,s,samp,script,select,small,span,strike,strong,' + /* 'style,' + */ 'sub,sup,table,tbody,td,textarea,tfoot,th,thead,' + /* 'title,' + */ 'tr,tt,u,ul,var,';
+
+	html						= [];
+	non_alapha					= /_\d*$/;
+	get_textnode				= function(value){
 		var ele;
 
 		if (
@@ -50,7 +67,7 @@ var $C = function(dom,id,doc) {
 					(value.condition)
 				&&	(typeof value.text !== "undefined")
 			){
-				ele = get_textnode(value.text);
+				ele				= get_textnode(value.text);
 			}
 		}
 		else {
@@ -67,71 +84,84 @@ var $C = function(dom,id,doc) {
 		}
 		return ele;
 	};
-	for(var tag in dom) {
-		var child = false;
+	for(tag in dom) {
+		child					= false;
 		if(isNaN(tag)) { //Associative array
-			var attributes = dom[tag];
+			attributes			= dom[tag];
 		} else { //It's a list
-			var tagname = "";
-			var attributes = "";
-			for(var tagname in dom[tag]) {
-				attributes = dom[tag][tagname];
+			tagname				= "";
+			attributes			= "";
+			for(tagname in dom[tag]) {
+				attributes		= dom[tag][tagname];
 			}
-			tag = tagname;
+			tag					= tagname;
 		}
-		tag = tag.replace(non_alapha,"");//Remove the numbers at the end
+		tag						= tag.replace(non_alapha,"");		//Remove the numbers at the end
 
-		var ele;
 		if (tag == "text"){
-			ele = get_textnode(attributes);
-			attributes = false;
+			ele					= get_textnode(attributes);
+			attributes			= false;
 		}
 		else {
-			ele = doc.createElement(tag);
+			ele					= doc.createElement(tag);
 		}
 
 		//If the given attribute is a string, it is a text node
-		if(typeof(attributes) == "string") child = doc.createTextNode(attributes);
+		if(typeof(attributes) == "string"){
+			child				= doc.createTextNode(attributes);
+		}
 		else if(attributes) {//If it an array...
-			for(var att in attributes) {
-				var value = "";
+			for(att in attributes) {
+				value			= "";
 				if(isNaN(att)) { //Associative array
-					value = attributes[att];
+					value		= attributes[att];
 				} else { //It's a list
-					for(var index in attributes[att]) {
-						value = attributes[att][index];
+					for(index in attributes[att]) {
+						value	= attributes[att][index];
 					}
- 					att = index;
+ 					att			= index;
 				}
 
-				att = att.replace(non_alapha,"");//Remove the numbers at the end - to solve the problem of non unique indexes
-				if(att == "condition"){if (! value) {ele = undefined; break;}}
-				else if(valid_tags.indexOf(","+att+",") != -1) { //If the attribute is a valid tag,
+				att				= att.replace(non_alapha,"");		//Remove the numbers at the end - to solve the problem of non unique indexes
+				if(att == "condition"){
+					if (! value) {
+						ele		= undefined;
+						break;
+					}
+				}
+				else if(valid_tags.indexOf(","+att+",") != -1) {	//If the attribute is a valid tag,
 					//Find the dom sturcture of that tag.
-					var node = new Object;
-					node[att] = value;
-					ele.appendChild($C(node,"",doc));// :RECURSION:
+					node		= {};
+					node[att]	= value;
+					ele.appendChild($C(node,"",doc));				//RECURSION
 				}
 				else if(att == "text") {
-					child = get_textnode(value);
+					child		= get_textnode(value);
 				}
-				else ele.setAttribute(att,value);
+				else {
+					ele.setAttribute(att,value);
+				}
 			}
 		}
 
 		if(ele){
-			if(child && attributes) ele.appendChild(child);//Append the child if it exists
+			if(child && attributes) ele.appendChild(child);			//Append the child if it exists
 			html.push(ele);
 		}
 	}
 
 	//If a node/id was given, append the created elements to that element.
 	if (id){
-		var node = id;
-		if(typeof id == "string") node = doc.getElementById(id);//If the given argument is an id.
-		for(var i=0;el=html[i],i<html.length;i++) node.appendChild(el);
+		node					= id;
+		if(typeof id == "string"){
+			node				= doc.getElementById(id);			//If the given argument is an id.
+		}
+		for(index=0; index<html.length; index++){
+			ele					= html[index];
+			node.appendChild(ele);
+		}
 	}
 
-	if(html.length == 1) return html[0];
+	if(html.length === 1) return html[0];							//If only one HTML element was created, then return that element. Otherwise, return the array of all HTML elements.
 	return html;
 };
